@@ -31,4 +31,7 @@ export class transacoes {
 
   @Column('timestamp without time zone')
   data: string;
+
+  @Column('char')
+  descricao: string;
 }

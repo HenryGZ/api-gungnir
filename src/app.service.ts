@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { pessoas, transacoes } from './database/dados.entity';
 import { NotFoundException } from '@nestjs/common';
+import { CreateTransacaoDto } from './DTOs/transacao.dto';
 
 @Injectable()
 export class AppService {
@@ -29,5 +30,25 @@ export class AppService {
       return { pessoa, message: 'sem transações' };
     }
     return { pessoa, transacoes: transactions };
+  }
+
+  async CreateTransaction(
+    id: number,
+    valor: number,
+    tipo: string,
+    descricao: string,
+  ): Promise<transacoes> {
+    const newTransactionDto = new CreateTransacaoDto();
+    newTransactionDto.id_pessoa = id;
+    newTransactionDto.valor = valor;
+    newTransactionDto.tipo = tipo;
+    newTransactionDto.descricao = descricao;
+    newTransactionDto.data = new Date().toISOString();
+
+    const newTransaction = this.transacoesRepository.create(newTransactionDto);
+
+    await this.transacoesRepository.save(newTransaction);
+
+    return newTransaction;
   }
 }

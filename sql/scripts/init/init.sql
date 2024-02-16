@@ -10,6 +10,7 @@ CREATE TABLE transacoes (
     id_pessoa INT NOT NULL,
     valor INT NOT NULL,
     tipo CHAR(1) NOT NULL,
+    descricao VARCHAR(10) NOT NULL,
     data TIMESTAMP NOT NULL,
     FOREIGN KEY (id_pessoa) REFERENCES pessoas(id)
 );
