@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { pessoas, transacoes } from './database/dados.entity';
 import { NotFoundException } from '@nestjs/common';
-import { CreateTransacaoDto } from './DTOs/transacao.dto';
+import { CreateTransacaoDto } from './dto/transacao.dto';
+import { BalanceResult } from './Interfaces/BalanceResult.interface';
 
 @Injectable()
 export class AppService {
@@ -32,12 +33,31 @@ export class AppService {
     return { pessoa, transacoes: transactions };
   }
 
+  async FindBalanceById(id: number): Promise<number> {
+    const pessoa = await this.pessoasRepository
+      .createQueryBuilder('pessoa')
+      .select('pessoa.saldo')
+      .where('pessoa.id = :id', { id })
+      .getOne();
+
+    if (!pessoa) {
+      throw new NotFoundException();
+    }
+
+    return pessoa.saldo;
+  }
+
   async CreateTransaction(
     id: number,
     valor: number,
     tipo: string,
     descricao: string,
-  ): Promise<transacoes> {
+  ): Promise<BalanceResult> {
+    const pessoa = await this.pessoasRepository.findOneById(id);
+    if (!pessoa) {
+      throw new NotFoundException();
+    }
+
     const newTransactionDto = new CreateTransacaoDto();
     newTransactionDto.id_pessoa = id;
     newTransactionDto.valor = valor;
@@ -49,6 +69,14 @@ export class AppService {
 
     await this.transacoesRepository.save(newTransaction);
 
-    return newTransaction;
+    if (tipo === 'c') {
+      pessoa.saldo += valor;
+    } else if (tipo === 'd') {
+      pessoa.saldo -= valor;
+    }
+
+    await this.pessoasRepository.save(pessoa);
+
+    return { limite: pessoa.limite, Saldo: pessoa.saldo };
   }
 }

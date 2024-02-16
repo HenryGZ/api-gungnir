@@ -2,7 +2,7 @@ CREATE TABLE pessoas (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(20) NOT NULL,
     limite INT NOT NULL,
-    saldo_inicial INT NOT NULL
+    saldo INT NOT NULL
 );
 
 CREATE TABLE transacoes (
@@ -15,7 +15,7 @@ CREATE TABLE transacoes (
     FOREIGN KEY (id_pessoa) REFERENCES pessoas(id)
 );
 
-INSERT INTO pessoas (nome, limite, saldo_inicial) VALUES
+INSERT INTO pessoas (nome, limite, saldo) VALUES
   ('Nome 1', 100000, 0),
   ('Nome 2', 80000, 0),
   ('Nome 3', 1000000, 0),

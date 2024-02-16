@@ -12,7 +12,7 @@ export class pessoas {
   limite: number;
 
   @Column('int')
-  saldo_inicial: number;
+  saldo: number;
 }
 
 @Entity()

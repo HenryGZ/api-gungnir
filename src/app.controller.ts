@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Controller,
   Get,
@@ -10,13 +11,15 @@ import {
 import { AppService } from './app.service';
 import { pessoas, transacoes } from './database/dados.entity';
 import { NotFoundException } from '@nestjs/common';
+import { Res } from '@nestjs/common';
+import { Response } from 'express';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get('clientes/:id/extrato')
-  async find(
+  async findAll(
     @Param('id') id: number,
   ): Promise<{ pessoa: pessoas; message?: string; transacoes?: transacoes[] }> {
     const result = await this.appService.FindById(id);
@@ -32,7 +35,8 @@ export class AppController {
     @Body('valor') valor: number,
     @Body('tipo') tipo: string,
     @Body('descricao') descricao: string,
-  ): Promise<transacoes> {
+    @Res() res: Response,
+  ): Promise<void> {
     if (!valor || !tipo || !descricao) {
       throw new BadRequestException('todos os campos são obrigatorios');
     }
@@ -41,6 +45,7 @@ export class AppController {
     if (valor < 0) throw new Error('Valor inválido');
     if (descricao.length > 10) throw new Error('Descrição inválida');
 
-    return this.appService.CreateTransaction(id, valor, tipo, descricao);
+    const result = await this.appService.CreateTransaction(id, valor, tipo, descricao);
+    res.status(200).send(result);
   }
 }
