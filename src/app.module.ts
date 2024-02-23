@@ -6,16 +6,18 @@ import { pessoas, transacoes } from './database/dados.entity'; // Importe a enti
 import { config } from 'dotenv';
 
 config();
-
+//Aqui pode usar hardcoded não ha problemas para o proposito da aplicacao
+//Se quiser deixar protegido pode mover para algum .env da vida
+// desde que ele contenha os mesmos valores declarados em baixo
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.localHost,
-      port: Number(process.env.POSTGRES_PORT),
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
+      host: '',//usar o mesmo do docker-compose db:hostname
+      port: 5432,//usar o mesmo do docker-compose db:port
+      username: '',//usar o mesmo do docker-compose db:environment:POSTGRES_USER
+      password: '',//usar o mesmo do docker-compose db:environment:POSTGRES_PASSWORD
+      database: '',//usar o mesmo do docker-compose db:environment:POSTGRES_DB
       entities: [pessoas, transacoes],
     }),
     TypeOrmModule.forFeature([pessoas]),

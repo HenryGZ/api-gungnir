@@ -1,8 +1,19 @@
-FROM node:21-alpine3.18 AS base
-RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
-WORKDIR /home/node/app
-COPY . .
+FROM node:latest
+
+# Diretorio virtual
+WORKDIR /usr/src/app
+
+# Mover apenas o package json para instalar dependencias
+COPY package*.json ./
+
+# Instalando dependencias
 RUN npm install
-COPY --chown=node:node . .
-EXPOSE 8080
-CMD [ "npm", "run", "start:prod" ]
+
+# Movendo código fonte
+COPY . .
+
+# Aqui estava o erro, rodando comando para gerar o projeto pronto para prod
+RUN npm run build 
+
+# Inicia arquivo de prod
+CMD [ "node", "dist/main.js" ]
