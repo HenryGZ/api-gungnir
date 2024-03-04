@@ -24,7 +24,7 @@ export class AppService {
     }
     const transactions = await this.transacoesRepository.find({
       where: { id_pessoa: id },
-      order: { data: 'DESC' },
+      order: { id: 'DESC' },
       take: 10,
     });
     if (!transactions.length) {
@@ -39,44 +39,45 @@ export class AppService {
       .select('pessoa.saldo')
       .where('pessoa.id = :id', { id })
       .getOne();
-
     if (!pessoa) {
       throw new NotFoundException();
     }
-
     return pessoa.saldo;
   }
-
   async CreateTransaction(
-    id: number,
-    valor: number,
-    tipo: string,
-    descricao: string,
+    createTransacaoDto: CreateTransacaoDto,
   ): Promise<BalanceResult> {
-    const pessoa = await this.pessoasRepository.findOneById(id);
-    if (!pessoa) {
-      throw new NotFoundException();
-    }
+    return this.pessoasRepository.manager.transaction(async (manager) => {
+      const { id, valor, tipo, descricao } = createTransacaoDto;
 
-    const newTransactionDto = new CreateTransacaoDto();
-    newTransactionDto.id_pessoa = id;
-    newTransactionDto.valor = valor;
-    newTransactionDto.tipo = tipo;
-    newTransactionDto.descricao = descricao;
-    newTransactionDto.data = new Date().toISOString();
+      const pessoa = await manager.findOne(pessoas, { where: { id } });
+      if (!pessoa) {
+        throw new NotFoundException();
+      }
 
-    const newTransaction = this.transacoesRepository.create(newTransactionDto);
+      const newTransaction = manager.create(transacoes, {
+        id_pessoa: id,
+        valor,
+        tipo,
+        descricao,
+        data: new Date().toISOString(),
+      });
 
-    await this.transacoesRepository.save(newTransaction);
+      await manager.save(newTransaction);
 
-    if (tipo === 'c') {
-      pessoa.saldo += valor;
-    } else if (tipo === 'd') {
-      pessoa.saldo -= valor;
-    }
+      if (tipo === 'c') {
+        pessoa.saldo += valor;
+      } else if (tipo === 'd') {
+        if (pessoa.saldo - valor < -pessoa.limite) {
+          throw new NotFoundException('credito insuficiente');
+        } else {
+          pessoa.saldo -= valor;
+        }
+      }
 
-    await this.pessoasRepository.save(pessoa);
+      await manager.save(pessoa);
 
-    return { limite: pessoa.limite, Saldo: pessoa.saldo };
+      return { limite: pessoa.limite, Saldo: pessoa.saldo };
+    });
   }
 }

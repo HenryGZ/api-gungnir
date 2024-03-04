@@ -13,11 +13,11 @@ config();
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: '',//usar o mesmo do docker-compose db:hostname
-      port: 5432,//usar o mesmo do docker-compose db:port
-      username: '',//usar o mesmo do docker-compose db:environment:POSTGRES_USER
-      password: '',//usar o mesmo do docker-compose db:environment:POSTGRES_PASSWORD
-      database: '',//usar o mesmo do docker-compose db:environment:POSTGRES_DB
+      host: '127.0.0.1', //quando for compilar a imagem usar 'db' como host
+      port: 5432, //usar o mesmo do docker-compose db:port
+      username: 'gungnir', //usar o mesmo do docker-compose db:environment:POSTGRES_USER
+      password: 'gungnir', //usar o mesmo do docker-compose db:environment:POSTGRES_PASSWORD
+      database: 'gungnir_db', //usar o mesmo do docker-compose db:environment:POSTGRES_DB
       entities: [pessoas, transacoes],
     }),
     TypeOrmModule.forFeature([pessoas]),
